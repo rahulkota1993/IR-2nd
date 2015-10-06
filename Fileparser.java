@@ -6,8 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class Fileparser {
 
@@ -15,8 +19,11 @@ public class Fileparser {
 	FileReader filereader;
 	BufferedReader br;
 	
-	HashMap<String, LinkedList<String>> hmindex;
+	HashMap<String, LinkedList<Integer>> hmindex;
 	HashMap<String, Integer> hmtopterms;
+	//Hashmaps for 2nd index i.e. by doc frequency sorting order
+	HashMap<String, LinkedList<Integer>> hmindextermfreq;
+	
 	//removable terms
 	FileWriter filewriter;//removable
 
@@ -26,9 +33,13 @@ public class Fileparser {
 		
 		
 		// hashmap for indexing
-		hmindex = new HashMap<String, LinkedList<String>>();
+		hmindex = new HashMap<String, LinkedList<Integer>>();
+		//hashmap for indexing with termfreq
+		hmindextermfreq=new HashMap<String, LinkedList<Integer>>();
+		
 		// hashmap for topkterms
 		hmtopterms = new HashMap<String, Integer>();
+		
 		//removable
 		filewriter=new FileWriter("assgn2.txt");//removable
 	}
@@ -40,7 +51,9 @@ public class Fileparser {
 		BufferedReader br = new BufferedReader(filereader);
 		String line=null;
 		while ((line = br.readLine()) != null) {
-			LinkedList<String> linkedlist = new LinkedList<String>();
+			LinkedList<Integer> linkedlist = new LinkedList<Integer>();
+			HashMap<Integer, Integer> hmtermfreq=new HashMap<Integer,Integer>();
+			
 
 			// formatting single line to obtain X Y Z from X\cY\mZ
 			String[] tokens = line.split("\\\\");
@@ -62,13 +75,36 @@ public class Fileparser {
 				String[] tokens2 = val.split("/");// get the documents index
 													// seperated from no. of
 													// times they repeat
-				linkedlist.add(tokens2[0]);
+				linkedlist.add(Integer.parseInt(tokens2[0]));
+				
+				hmtermfreq.put(Integer.parseInt(tokens2[0]), Integer.parseInt(tokens2[1]));
 			}
+			
+			
+				valuecompareinteger vcr=new valuecompareinteger(hmtermfreq);
+				TreeMap<Integer, Integer> tmtermfreq=new TreeMap<Integer, Integer>(vcr);
+				tmtermfreq.putAll(hmtermfreq);
+				//System.out.println(tmtermfreq);
+				LinkedList<Integer> listtermfreq=new LinkedList<Integer>();
+				Set<Map.Entry<Integer, Integer>> set = tmtermfreq.entrySet();
+
+				for (Map.Entry<Integer, Integer> me : set) {
+					
+					listtermfreq.add(me.getKey());
+				}
+				hmindextermfreq.put(term, listtermfreq);
+
+				
+				
+				
+			
+			
+			Collections.sort(linkedlist);
 			hmindex.put(term, linkedlist);
 			hmtopterms.put(term, sizeofpos);
 			
 			filewriter.write(term+": ");
-			filewriter.write(hmindex.get(term).toString());
+			filewriter.write(hmindextermfreq.get(term).toString());
 			//filewriter.write(hmtopterms.get(term).toString());
 			filewriter.write("\n");	
 			
@@ -79,10 +115,12 @@ public class Fileparser {
 		filewriter.close();
 	}
 	
-	HashMap<String, LinkedList<String>> gethashmapforindex(){
+	HashMap<String, LinkedList<Integer>> gethashmapforindex(){
 		return hmindex;
 	}
-	
+	HashMap<String, LinkedList<Integer>> gethashmapforindexwithtermfreq(){
+		return hmindextermfreq;//to change
+	}
 	HashMap<String, Integer> gethashmapfortopkterms(){
 		return hmtopterms;
 	}

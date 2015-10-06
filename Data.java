@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
+import javax.xml.crypto.dsig.spec.HMACParameterSpec;
+
 public class data {
 
 	public static void main(String args[]){
@@ -20,8 +22,10 @@ public class data {
 			fileparser.parsefileforindex();
 			
 			//Loading Hashmaps for index and topkterms
-			HashMap<String, LinkedList<String>> gethmindex=new HashMap<String, LinkedList<String>>();
+			HashMap<String, LinkedList<Integer>> gethmindex=new HashMap<String, LinkedList<Integer>>();
+			HashMap<String, LinkedList<Integer>> gethmindextermfreq=new HashMap<String, LinkedList<Integer>>();
 			gethmindex=fileparser.gethashmapforindex();
+			gethmindextermfreq=fileparser.gethashmapforindexwithtermfreq();
 			
 			HashMap<String, Integer> gethmtopterms=new HashMap<String, Integer>();
 			
@@ -37,6 +41,10 @@ public class data {
 			topterms topk=new topterms(5,topkpath);
 			topk.getTopK(tmtopterms);
 			System.out.println("Execution successful :-)");
+			
+			String test="zone";
+			System.out.println(gethmindex.get(test)+"\n");
+			System.out.println(gethmindextermfreq.get(test));
 			
 				}catch(Exception e){
 			e.printStackTrace();
